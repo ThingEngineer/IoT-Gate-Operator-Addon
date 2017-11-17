@@ -1,0 +1,19 @@
+// HTTP handler function
+function httpHandler(req, resp) {
+    try {
+        local d = http.jsondecode(req.body);
+        //server.log(d.c);
+        if (d.c == "btn") {
+            //server.log(d.val);
+            device.send("btn", d.val);
+            resp.send(200, "OK");
+        }
+    } catch(ex) {
+        // If there was an error, send it back in the response
+        server.log("error:" + ex);
+        resp.send(500, "Internal Server Error: " + ex);
+    }
+}
+
+// Register HTTP Handler
+http.onrequest(httpHandler);
