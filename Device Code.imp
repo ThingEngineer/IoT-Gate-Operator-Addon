@@ -1,0 +1,50 @@
+// Global variabled for gate open pin (active low)
+gate <- hardware.pin1;
+
+// Configure 'gate' to be a digital output with a starting value of digital 1 (high)
+gate.configure(DIGITAL_OUT, 1);
+
+// Latch Timer object
+local latchTimer = null
+
+agent.on("btn", function(data)
+{
+    switch (data.cmd) {
+        case "open":
+            gate.write(0);
+            if (latchTimer) imp.cancelwakeup(latchTimer);
+            latchTimer = imp.wakeup(0.5, release);
+            server.log("Open command received");
+            break
+
+        case "latch30m":
+            gate.write(0);
+            if (latchTimer) imp.cancelwakeup(latchTimer);
+            latchTimer = imp.wakeup(1800, release);
+            server.log("Latch30m command received");
+            break
+
+        case "latch8h":
+            gate.write(0);
+            if (latchTimer) imp.cancelwakeup(latchTimer);
+            latchTimer = imp.wakeup(28800, release);
+            server.log("Latch8h command received");
+            break
+
+        case "close":
+            if (latchTimer) imp.cancelwakeup(latchTimer);
+            gate.write(1);
+            server.log("Close now command received");
+            break
+
+        default:
+            server.log("Button command not recognized");
+    }
+});
+
+
+function release() {
+    if (latchTimer) imp.cancelwakeup(latchTimer);
+    gate.write(1);
+    server.log("Timer released gate switch contact");
+}
