@@ -1,8 +1,26 @@
-// Global variabled for gate open pin (active low)
-gate <- hardware.pin1;
+// Debouce library
+#require "Button.class.nut:1.2.0"
 
-// Configure 'gate' to be a digital output with a starting value of digital 1 (high)
-gate.configure(DIGITAL_OUT, 1);
+// Alias for gateOpen GPIO pin (active low)
+gateOpen <- hardware.pin2;
+
+// Alias for gateClose control GPIO pin (active low)
+gateClose <- hardware.pin7;
+
+// Configure 'gateOpen' to be a digital output with a starting value of digital 1 (high)
+gateOpen.configure(DIGITAL_OUT, 1);
+
+// Configure 'gateClose' to be a digital output with a starting value of digital 1 (high)
+gateClose.configure(DIGITAL_OUT, 1);
+
+// Alias for the GPIO pin that indicates the gate is moving (N.O.)
+gateMovingState <- Button(hardware.pin8, DIGITAL_IN_PULLUP);
+
+// Alias for the GPIO pin that indicates the gate is fully open (N.O.)
+gateOpenState <- Button(hardware.pin9, DIGITAL_IN_PULLUP);
+
+// Global variable to hold the gate state (Open = 1 / Closed = 0)
+local lastGateOpenState = 0;
 
 // Latch Timer object
 local latchTimer = null
@@ -11,29 +29,31 @@ agent.on("btn", function(data)
 {
     switch (data.cmd) {
         case "open":
-            gate.write(0);
+            gateOpen.write(0);
             if (latchTimer) imp.cancelwakeup(latchTimer);
-            latchTimer = imp.wakeup(0.5, release);
+            latchTimer = imp.wakeup(1, releaseOpen);
             server.log("Open command received");
             break
 
         case "latch30m":
-            gate.write(0);
+            gateOpen.write(0);
             if (latchTimer) imp.cancelwakeup(latchTimer);
-            latchTimer = imp.wakeup(1800, release);
+            latchTimer = imp.wakeup(1800, releaseOpen);
             server.log("Latch30m command received");
             break
 
         case "latch8h":
-            gate.write(0);
+            gateOpen.write(0);
             if (latchTimer) imp.cancelwakeup(latchTimer);
-            latchTimer = imp.wakeup(28800, release);
+            latchTimer = imp.wakeup(28800, releaseOpen);
             server.log("Latch8h command received");
             break
 
         case "close":
             if (latchTimer) imp.cancelwakeup(latchTimer);
-            gate.write(1);
+            gateOpen.write(1);
+            gateClose.write(0);
+            latchTimer = imp.wakeup(1, releaseClose);
             server.log("Close now command received");
             break
 
@@ -42,9 +62,34 @@ agent.on("btn", function(data)
     }
 });
 
-
-function release() {
+function releaseOpen() {
     if (latchTimer) imp.cancelwakeup(latchTimer);
-    gate.write(1);
-    server.log("Timer released gate switch contact");
+    gateOpen.write(1);
+    //server.log("Timer released gateOpen switch contact");
 }
+
+function releaseClose() {
+    if (latchTimer) imp.cancelwakeup(latchTimer);
+    gateClose.write(1);
+    //server.log("Timer released gateClose switch contact");
+}
+
+gateMovingState.onPress(function() {     // The relay is activated, gate is moving
+    //server.log("Gate is opening");
+    local data = { "gatestate" : 1, "timer" : hardware.millis() };
+    agent.send("gateStateChange", data);
+}).onRelease(function() {               // The relay is released, gate is at rest
+    //server.log("Gate is closed");
+    local data = { "gatestate" : 0, "timer" : hardware.millis() };
+    agent.send("gateStateChange", data);
+});
+
+gateOpenState.onPress(function() {       // The relay is activated, gate is fully open
+    //server.log("Gate is open");
+    local data = { "gatestate" : 2, "timer" : hardware.millis() };
+    agent.send("gateStateChange", data);
+}).onRelease(function() {               // The relay is released, gate is not fully open
+    //server.log("Gate is closing");
+    local data = { "gatestate" : 3, "timer" : hardware.millis() };
+    agent.send("gateStateChange", data);
+});
