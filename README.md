@@ -12,3 +12,6 @@ This is a fully functioning solution with all code and designed listed here.
 (Instructable)[https://www.instructables.com/id/IoT-Gate-Opperator-Addon/]
 
 An example is hosted at (projects.ajillion.com/gate)[http://projects.ajillion.com/gate].
+
+## Open Source
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a>  <a rel="license" href="http://creativecommons.org/freeworks"><img alt="Approved for Free Cultural Works" style="border-width:0" height="32" width="32" src="http://creativecommons.org/images/deed/seal.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
