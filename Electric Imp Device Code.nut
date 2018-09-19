@@ -124,11 +124,17 @@ gateOpenState.onPress(function() {       // The relay is activated, gate is full
 // Set the timeout policy to RETURN_ON_ERROR, ie. to continue running at disconnect (loss of wifi)
 server.setsendtimeoutpolicy(RETURN_ON_ERROR, WAIT_TIL_SENT, 10);
 
+// Record the state of the device's connectivity
+local disconnectedFlag = false;
+
 // Define the disconnection handler
 function disconnectHandler(reason) {
   if (reason != SERVER_CONNECTED) {
     // Attempt to reconnect
     server.connect(disconnectHandler, 60);
+    disconnectedFlag = true;
+ } else {
+    disconnectedFlag = false;
   }
 }
 
