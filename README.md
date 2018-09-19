@@ -1,7 +1,9 @@
 # IoT-Gate-Operator-Addon
 IoT Gate Operator Addon with web app based on the electric imp
 
-I have a client who had a gated area where many people needed to come and go. They didn't want to use a keypad on the outside and only had a limited number of keyfob transmitters. Finding an affordable source for additional keyfobs was difficult. I thought it would be a great opportunity to upgrade this Liftmaster gate operator to be IoT compatible with custom hardware, web API and web app interface. This not only solved the mass access problem it opened up additional functionality as well!
+I have a client who had a gated area where many people needed to come and go. They didn't want to use a keypad on the outside and only had a limited number of keyfob transmitters. Finding an affordable source for additional keyfobs was difficult. I thought it would be an excellent opportunity to upgrade this Liftmaster gate operator to be IoT compatible with custom hardware, web API and web app interface. This not only solved the mass access problem it opened up additional functionality as well!
+
+![System Diagram](https://github.com/ThingEngineer/ESP32_BLE_client_uart/raw/master/docs/images/gate-access-controller-system-diagram.jpg)
 
 This is a fully functioning solution with all code and designed listed here.
 
