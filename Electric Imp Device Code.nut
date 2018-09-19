@@ -8,10 +8,10 @@ gateOpen <- hardware.pin2;
 // Alias for gateClose control GPIO pin (active low)
 gateClose <- hardware.pin7;
 
-// Configure 'gateOpen' to be a digital output with a starting value of digital 1 (high)
+// Configure 'gateOpen' to be a digital output with a starting value of digital 1 (high) (active low)
 gateOpen.configure(DIGITAL_OUT, 1);
 
-// Configure 'gateClose' to be a digital output with a starting value of digital 1 (high)
+// Configure 'gateClose' to be a digital output with a starting value of digital 1 (high) (active low)
 gateClose.configure(DIGITAL_OUT, 1);
 
 // Alias for the GPIO pin that indicates the gate is moving (N.O.)
