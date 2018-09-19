@@ -1,5 +1,6 @@
 // Debouce library
 #require "Button.class.nut:1.2.0"
+//server.log(hardware.getdeviceid());
 
 // Alias for gateOpen GPIO pin (active low)
 gateOpen <- hardware.pin2;
@@ -55,6 +56,11 @@ agent.on("btn", function(data)
             gateClose.write(0);
             latchTimer = imp.wakeup(1, releaseClose);
             server.log("Close now command received");
+            // Send close state manually
+            if (lastGateOpenState == 0) break;
+            local data = { "gatestate" : 3, "timer" : hardware.millis() };
+            agent.send("gateStateChange", data);
+            lastGateOpenState = 3;
             break
 
         default:
@@ -75,21 +81,28 @@ function releaseClose() {
 }
 
 gateMovingState.onPress(function() {     // The relay is activated, gate is moving
-    //server.log("Gate is opening");
+    if (lastGateOpenState == 2) return;
+    server.log("Gate is opening");
     local data = { "gatestate" : 1, "timer" : hardware.millis() };
     agent.send("gateStateChange", data);
+    lastGateOpenState = 1;
+    local netData = imp.net.info();
+    server.log("RSSI: " + netData.interface[netData.active].rssi)
 }).onRelease(function() {               // The relay is released, gate is at rest
-    //server.log("Gate is closed");
+    server.log("Gate is closed");
     local data = { "gatestate" : 0, "timer" : hardware.millis() };
     agent.send("gateStateChange", data);
+    lastGateOpenState = 0;
 });
 
 gateOpenState.onPress(function() {       // The relay is activated, gate is fully open
-    //server.log("Gate is open");
+    server.log("Gate is open");
     local data = { "gatestate" : 2, "timer" : hardware.millis() };
     agent.send("gateStateChange", data);
+    lastGateOpenState = 2;
 }).onRelease(function() {               // The relay is released, gate is not fully open
-    //server.log("Gate is closing");
+    server.log("Gate is closing");
     local data = { "gatestate" : 3, "timer" : hardware.millis() };
     agent.send("gateStateChange", data);
+    lastGateOpenState = 3;
 });
