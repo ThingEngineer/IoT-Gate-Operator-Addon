@@ -1,6 +1,6 @@
 <?php
 
-class Projects extends CI_Controller {
+class Gate extends CI_Controller {
 	
 	function __construct()
 	{
@@ -86,5 +86,5 @@ class Projects extends CI_Controller {
 	
 }
 
-/* End of file Projects.php */
-/* Location: ./application/controllers/projects.php */
+/* End of file gate.php */
+/* Location: ./application/controllers/gate.php */
