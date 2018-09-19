@@ -34,8 +34,11 @@ agent.on("btn", function(data)
     switch (data.cmd) {
         case "open":
             gateOpen.write(0);
-            if (latchTimer) imp.cancelwakeup(latchTimer);
-            latchTimer = imp.wakeup(1, releaseOpen);
+            if (! latchState) // Only do this if gate is not already latched open to prevent canceling latchTimer instance
+            {
+                if (latchTimer) imp.cancelwakeup(latchTimer);
+                latchTimer = imp.wakeup(1, releaseOpen);
+            }
             server.log("Open command received");
             break;
 
