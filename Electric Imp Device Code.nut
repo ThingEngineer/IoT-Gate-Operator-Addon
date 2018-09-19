@@ -26,6 +26,9 @@ local lastGateOpenState = 0;
 // Latch Timer object
 local latchTimer = null
 
+// Global variable indicate gate is in a latched open for xTime state (Latched Open = 1 / Closed/Free = 0)
+local latchState = false;
+
 agent.on("btn", function(data)
 {
     switch (data.cmd) {
@@ -34,26 +37,29 @@ agent.on("btn", function(data)
             if (latchTimer) imp.cancelwakeup(latchTimer);
             latchTimer = imp.wakeup(1, releaseOpen);
             server.log("Open command received");
-            break
+            break;
 
         case "latch30m":
             gateOpen.write(0);
             if (latchTimer) imp.cancelwakeup(latchTimer);
-            latchTimer = imp.wakeup(1800, releaseOpen);
+            latchState = true;
+            latchTimer = imp.wakeup(1800, releaseLatch);
             server.log("Latch30m command received");
-            break
+            break;
 
         case "latch8h":
             gateOpen.write(0);
             if (latchTimer) imp.cancelwakeup(latchTimer);
-            latchTimer = imp.wakeup(28800, releaseOpen);
+            latchState = true;
+            latchTimer = imp.wakeup(28800, releaseLatch);
             server.log("Latch8h command received");
-            break
+            break;
 
         case "close":
             if (latchTimer) imp.cancelwakeup(latchTimer);
             gateOpen.write(1);
             gateClose.write(0);
+            latchState = false;
             latchTimer = imp.wakeup(1, releaseClose);
             server.log("Close now command received");
             // Send close state manually
@@ -61,14 +67,22 @@ agent.on("btn", function(data)
             local data = { "gatestate" : 3, "timer" : hardware.millis() };
             agent.send("gateStateChange", data);
             lastGateOpenState = 3;
-            break
+            break;
 
         default:
             server.log("Button command not recognized");
     }
 });
 
+function releaseLatch() {
+    latchState = false;
+    if (latchTimer) imp.cancelwakeup(latchTimer);
+    gateOpen.write(1);
+    //server.log("Timer released Latch gateOpen switch contact");
+}
+
 function releaseOpen() {
+    if (latchState) return;     // Exit if gate is latched open to prevent canceling latch
     if (latchTimer) imp.cancelwakeup(latchTimer);
     gateOpen.write(1);
     //server.log("Timer released gateOpen switch contact");
